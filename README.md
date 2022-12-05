@@ -1,6 +1,6 @@
 # UnispectDMAPlugin
 
-This is a plugin for Unispect!
+This is a plugin for Unispect, using the MemProcFS (PciLeech) Library.
 
 ## What can you do with it?
 Read memory through your FPGA board without having to run Unispect on your main computer! It is as simple as that
@@ -14,6 +14,7 @@ Read memory through your FPGA board without having to run Unispect on your main 
   - symsrv.dll
   - dbghelp.dll
 - You can download most of the above binaries at:
+  - https://github.com/Razchek/Unispect/releases
   - https://github.com/ufrisk/MemProcFS/releases
   - https://ftdichip.com/drivers/d3xx-drivers/
 - Build the solution for x64. Place all build files into the *Plugins* folder in your Unispect Directory.
