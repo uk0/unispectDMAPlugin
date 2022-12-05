@@ -18,6 +18,8 @@ using System.Collections.Generic;
  *  
  */
 
+/* Modifications to MemRead made by Frost 12/5/2022 */
+
 namespace vmmsharp
 {
     public struct MEM_SCATTER
@@ -552,20 +554,19 @@ namespace vmmsharp
             return new VmmScatter(hS);
         }
 
+        /// <summary>
+        /// Modified by Frost.
+        /// No longer resizes array.
+        /// </summary>
         public unsafe byte[] MemRead(uint pid, ulong qwA, uint cb, uint flags = 0)
         {
-            uint cbRead;
             byte[] data = new byte[cb];
             fixed (byte* pb = data)
             {
-                if (!vmmi.VMMDLL_MemReadEx(hVMM, pid, qwA, pb, cb, out cbRead, flags))
+                if (!vmmi.VMMDLL_MemReadEx(hVMM, pid, qwA, pb, cb, out var cbRead, flags))
                 {
                     return null;
                 }
-            }
-            if (cbRead != cb)
-            {
-                Array.Resize<byte>(ref data, (int)cbRead);
             }
             return data;
         }
