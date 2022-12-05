@@ -16,9 +16,12 @@ namespace unispectDMAPlugin
             const string memMapFilename = @"mmap.txt";
             try
             {
-                Log.Add("DMA Plugin starting...");
+                Log.Add("[DMA] Plugin starting...");
                 if (File.Exists(memMapFilename))
+                {
+                    Log.Add("[DMA] Memory Map Found!");
                     _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-memmap", memMapFilename, "-waitinitialize");
+                }
                 else
                     _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-waitinitialize");
             }
