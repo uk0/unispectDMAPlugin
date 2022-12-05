@@ -17,7 +17,7 @@ Read memory through your FPGA board without having to run Unispect on your main 
   - https://github.com/ufrisk/MemProcFS/releases
   - https://ftdichip.com/drivers/d3xx-drivers/
 - Build the solution for x64. Place all build files into the *Plugins* folder in your Unispect Directory.
-- If you have a Memory Map *(Optional)* place it in the Unispect.exe directory (one level up from Plugins).
+- *(Optional)* If you have a Memory Map place it in the Unispect.exe directory (one level up from Plugins).
   - Memory Map should be named *mmap.txt*
 
 ### Have fun
