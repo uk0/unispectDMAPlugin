@@ -20,5 +20,6 @@ Dump Mono Assemblies with Unispect from a second computer, using an FPGA DMA Car
 - Build the solution for x64. Place all build files into the *Plugins* folder in your Unispect Directory.
 - *(Optional)* If you have a Memory Map place it in the Unispect.exe directory (one level up from Plugins).
   - Memory Map should be named *mmap.txt*
+- *(Optional)* There is a Pre-Compiled 'Custom' version of Unispect in Releases that has this Plugin *Built-In*. You can skip all the setup instructions above.
 
 ### Have fun!
