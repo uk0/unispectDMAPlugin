@@ -2,6 +2,8 @@
 
 This is a plugin for Unispect, using the MemProcFS (PciLeech) Library.
 
+For a Custom Version of Unispect with this Plugin *Built-In*, See [Unispect-DMA](https://github.com/imerzan/Unispect-DMA).
+
 ## What can you do with it?
 Dump Unity Mono Assemblies with Unispect from a second computer, using an FPGA DMA Card.
 
