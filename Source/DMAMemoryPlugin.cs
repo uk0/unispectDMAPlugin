@@ -8,34 +8,38 @@ namespace unispectDMAPlugin
     [UnispectPlugin]
     public sealed class DMAMemoryPlugin : MemoryProxy
     {
+        private const string MemMapPath = @"mmap.txt";
         // Using a static field since Unispect does not Dispose the plugin after each operation.
         // However it will attempt to re-run the constructor each time (leading to an FPGA Init error).
-        // Using a static will save the plugin state between operations.
+        // Using a static field will save the plugin state between operations.
+        // Uses a lock to prevent possible (but unlikely) race conditions.
+        private static readonly object _sync = new();
         private static Vmm _vmm;
         private static bool _loaded = false;
         private uint _pid;
 
         public DMAMemoryPlugin()
         {
-            const string memMapFilename = @"mmap.txt";
-            try
+            lock (_sync)
             {
-                if (_loaded) return;
-                Log.Add("[DMA] Plugin Starting...");
-                if (File.Exists(memMapFilename))
+                try
                 {
-                    Log.Add("[DMA] Memory Map Found!");
-                    _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-memmap", memMapFilename, "-waitinitialize");
+                    if (_loaded) return;
+                    Log.Add("[DMA] Plugin Starting...");
+                    if (File.Exists(MemMapPath))
+                    {
+                        Log.Add("[DMA] Memory Map Found!");
+                        _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-memmap", MemMapPath, "-waitinitialize");
+                    }
+                    else
+                        _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-waitinitialize");
+                    _loaded = true;
+                    Log.Add("[DMA] Plugin Loaded!");
                 }
-                else
-                    _vmm = new Vmm("-printf", "-v", "-device", "FPGA", "-waitinitialize");
-                _loaded = true;
-                Log.Add("[DMA] Plugin Loaded!");
-            }
-            catch (Exception ex)
-            {
-                Log.Add($"[DMA] ERROR Initializing FPGA: {ex}");
-                throw new DMAMemoryPluginException("ERROR Initializing FPGA", ex);
+                catch (Exception ex)
+                {
+                    throw new DMAMemoryPluginException("[DMA] ERROR Initializing FPGA", ex);
+                }
             }
         }
 
@@ -43,17 +47,14 @@ namespace unispectDMAPlugin
         {
             try
             {
-                Log.Add($"[DMA] Getting module '{moduleName}'");
-                Vmm.MAP_MODULEENTRY module = _vmm.Map_GetModuleFromName(_pid, moduleName);
-
-                Log.Add($"[DMA] Module Search: {moduleName} | Found: {module.wszText} | BaseAddr: 0x{module.vaBase.ToString("X")} | Size: {module.cbImageSize}");
-
+                Log.Add($"[DMA] Module Search: '{moduleName}'");
+                var module = _vmm.Map_GetModuleFromName(_pid, moduleName);
+                Log.Add($"[DMA] Module Found: '{module.wszText}' | Base: 0x{module.vaBase.ToString("X")} | Size: {module.cbImageSize}");
                 return new ModuleProxy(moduleName, module.vaBase, (int)module.cbImageSize);
             }
             catch (Exception ex)
             {
-                Log.Add($"[DMA] ERROR Getting module '{moduleName}': {ex}");
-                throw new DMAMemoryPluginException($"ERROR Getting module '{moduleName}'", ex);
+                throw new DMAMemoryPluginException($"[DMA] ERROR retrieving module '{moduleName}'", ex);
             }
         }
 
@@ -62,14 +63,16 @@ namespace unispectDMAPlugin
             try
             {
                 Log.Add($"[DMA] Attaching to process '{handle}'");
-                // Slightly differs from Unispect's default Memory Plugin
+                // Slightly differs from Unispect's default Memory Plugin.
                 // Use 'ProcessName.exe' instead of 'ProcessName'.
-                return _vmm.PidGetFromName(handle, out _pid);
+                _vmm.PidGetFromName(handle, out _pid);
+                if (_pid != 0)
+                    return true;
+                throw new Exception("Process not found!");
             }
             catch (Exception ex)
             {
-                Log.Add($"[DMA] ERROR attaching to process '{handle}': {ex}");
-                throw new DMAMemoryPluginException($"ERROR attaching to process '{handle}'", ex);
+                throw new DMAMemoryPluginException($"[DMA] ERROR attaching to process '{handle}'", ex);
             }
         }
 
@@ -82,33 +85,19 @@ namespace unispectDMAPlugin
             }
             catch (Exception ex)
             {
-                Log.Add($"[DMA] ERROR Reading Memory at 0x{address.ToString("X")}: {ex}");
-                throw new DMAMemoryPluginException($"ERROR Reading Memory at 0x{address.ToString("X")}", ex);
+                throw new DMAMemoryPluginException($"[DMA] ERROR Reading {length} bytes at 0x{address.ToString("X")}", ex);
             }
         }
 
         public override void Dispose()
         {
-            Log.Add("[DMA] Dispose");
-            _vmm.Dispose(); // Close FPGA Connection and Release Resources
-            _vmm = null;
-            _loaded = false;
-        }
-    }
-    public sealed class DMAMemoryPluginException : Exception
-    {
-        public DMAMemoryPluginException()
-        {
-        }
-
-        public DMAMemoryPluginException(string message)
-            : base(message)
-        {
-        }
-
-        public DMAMemoryPluginException(string message, Exception inner)
-            : base(message, inner)
-        {
+            lock (_sync)
+            {
+                Log.Add("[DMA] Dispose");
+                _vmm?.Dispose(); // Close FPGA Connection and Release Resources
+                _vmm = null;
+                _loaded = false;
+            }
         }
     }
 }

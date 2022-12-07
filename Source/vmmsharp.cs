@@ -18,7 +18,7 @@ using System.Collections.Generic;
  *  
  */
 
-/* Modifications to MemRead made by Frost 12/5/2022 */
+/* Modifications to MemRead and Map_GetModuleFromName made by Frost 12/7/2022 */
 
 namespace vmmsharp
 {
@@ -1352,27 +1352,37 @@ namespace vmmsharp
             return m;
         }
 
+        /// <summary>
+        /// Modified by Frost.
+        /// Will throw exception on failure.
+        /// </summary>
         public unsafe MAP_MODULEENTRY Map_GetModuleFromName(uint pid, string wszModuleName)
         {
             IntPtr pMap = IntPtr.Zero;
-            MAP_MODULEENTRY e = new MAP_MODULEENTRY();
-            if (!vmmi.VMMDLL_Map_GetModuleFromName(hVMM, pid, wszModuleName, out pMap)) { goto fail; }
-            vmmi.VMMDLL_MAP_MODULEENTRY nM = Marshal.PtrToStructure<vmmi.VMMDLL_MAP_MODULEENTRY>(pMap);
-            e.fValid = true;
-            e.vaBase = nM.vaBase;
-            e.vaEntry = nM.vaEntry;
-            e.cbImageSize = nM.cbImageSize;
-            e.fWow64 = nM.fWow64;
-            e.wszText = wszModuleName;
-            e.wszFullName = nM.wszFullName;
-            e.tp = nM.tp;
-            e.cbFileSizeRaw = nM.cbFileSizeRaw;
-            e.cSection = nM.cSection;
-            e.cEAT = nM.cEAT;
-            e.cIAT = nM.cIAT;
-        fail:
-            vmmi.VMMDLL_MemFree((byte*)pMap.ToPointer());
-            return e;
+            try
+            {
+                MAP_MODULEENTRY e = new MAP_MODULEENTRY();
+                if (!vmmi.VMMDLL_Map_GetModuleFromName(hVMM, pid, wszModuleName, out pMap))
+                    throw new Exception("Module lookup failed!");
+                vmmi.VMMDLL_MAP_MODULEENTRY nM = Marshal.PtrToStructure<vmmi.VMMDLL_MAP_MODULEENTRY>(pMap);
+                e.fValid = true;
+                e.vaBase = nM.vaBase;
+                e.vaEntry = nM.vaEntry;
+                e.cbImageSize = nM.cbImageSize;
+                e.fWow64 = nM.fWow64;
+                e.wszText = wszModuleName;
+                e.wszFullName = nM.wszFullName;
+                e.tp = nM.tp;
+                e.cbFileSizeRaw = nM.cbFileSizeRaw;
+                e.cSection = nM.cSection;
+                e.cEAT = nM.cEAT;
+                e.cIAT = nM.cIAT;
+                return e;
+            }
+            finally
+            {
+                vmmi.VMMDLL_MemFree((byte*)pMap.ToPointer());
+            }
         }
 
         public unsafe MAP_UNLOADEDMODULEENTRY[] Map_GetUnloadedModule(uint pid)

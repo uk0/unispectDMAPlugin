@@ -32,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Source\DMAMemoryPluginException.cs" />
     <Compile Include="Source\DMAMemoryPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\vmmsharp.cs" />
