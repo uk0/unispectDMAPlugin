@@ -62,4 +62,7 @@
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>CALL $(ProjectDir)publish.bat</PostBuildEvent>
+  </PropertyGroup>
 </Project>
