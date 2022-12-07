@@ -2,7 +2,7 @@
 
 This is a plugin for Unispect, using the MemProcFS (PciLeech) Library.
 
-For a Custom Version of Unispect with this Plugin *Built-In*, See [Unispect-DMA](https://github.com/imerzan/Unispect-DMA).
+For a Custom Compiled Version of Unispect with this Plugin *Built-In*, See [Unispect-DMA](https://github.com/imerzan/Unispect-DMA).
 
 ## What can you do with it?
 Dump Unity Mono Assemblies with Unispect from a second computer, using an FPGA DMA Card.
@@ -22,6 +22,5 @@ Dump Unity Mono Assemblies with Unispect from a second computer, using an FPGA D
 - Build the solution for x64. Place all build files into the *Plugins* folder in your Unispect Directory.
 - *(Optional)* If you have a Memory Map place it in the Unispect.exe directory (one level up from Plugins).
   - Memory Map should be named *mmap.txt*
-- *(Optional)* There is a Pre-Compiled 'Custom' version of Unispect in Releases that has this Plugin *Built-In*. You can skip all the setup instructions above.
 
 ### Have fun!
