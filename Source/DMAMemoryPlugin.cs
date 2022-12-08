@@ -65,10 +65,10 @@ namespace unispectDMAPlugin
                 Log.Add($"[DMA] Attaching to process '{handle}'");
                 // Slightly differs from Unispect's default Memory Plugin.
                 // Use 'ProcessName.exe' instead of 'ProcessName'.
-                _vmm.PidGetFromName(handle, out _pid);
-                if (_pid != 0)
-                    return true;
-                throw new Exception("Process not found!");
+                if (!_vmm.PidGetFromName(handle, out _pid))
+                    throw new Exception("Process not found!");
+                return true;
+
             }
             catch (Exception ex)
             {
